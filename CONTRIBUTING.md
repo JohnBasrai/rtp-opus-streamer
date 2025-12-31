@@ -4,7 +4,7 @@ Thanks for considering contributing!
 
 Before submitting a pull request:
 
-- Ensure all tests pass (`cargo test`)
+- Ensure all tests pass (`./scripts/test-all.sh`)
 - Format your code (`cargo fmt`)
 - Run clippy (`cargo clippy -- -D warnings`)
 - If your change affects behavior, please update `CHANGELOG.md` under the [Unreleased] section
@@ -25,11 +25,11 @@ cargo fmt
 # Check if code is formatted (used by CI)
 cargo fmt --check
 
-# Run clippy
-cargo clippy --all-targets --all-features -- -D warnings
+# Run the complete test suite (matches CI exactly)
+./scripts/test-all.sh
 
-# Run the complete test suite
-cargo test --all
+# Run CI locally (requires 'act')
+./scripts/ci-local.sh
 ```
 
 ### Visual Separators
@@ -159,6 +159,13 @@ Well-written doc comments are considered part of the code's correctness.
 
 ## Testing Guidelines
 
+### Test Scripts
+
+Test scripts in `scripts/` match the CI workflow exactly:
+
+- **`test-all.sh`**: Runs formatting, clippy, build, and all tests (same as CI)
+- **`ci-local.sh`**: Runs GitHub Actions locally using [act](https://github.com/nektos/act)
+
 ### Integration Tests
 
 Integration tests should be placed in the `tests/` directory with the naming convention:
@@ -175,18 +182,38 @@ Examples:
 
 Unit tests should be co-located with the code being tested using the standard `#[cfg(test)]` module pattern.
 
+**Note:** This project uses binary crates (`sender` and `receiver`), so unit tests are embedded within the binary source files rather than in separate `lib.rs` files.
+
 ### Running Tests
 
 ```bash
-# All tests
+# All tests (same as CI)
+./scripts/test-all.sh
+
+# Or manually:
 cargo test --all
 
 # Specific integration test
 cargo test --test test_core_pipeline
 
-# Unit tests only
-cargo test --lib
-
 # With logging output
 RUST_LOG=debug cargo test -- --nocapture
 ```
+
+## Local CI Testing
+
+To verify your changes will pass CI before pushing:
+
+```bash
+# Install act (one-time setup)
+# macOS:
+brew install act
+
+# Linux:
+# See https://github.com/nektos/act#installation
+
+# Run CI locally
+./scripts/ci-local.sh
+```
+
+This runs the exact same workflow as GitHub Actions, catching issues before you push.

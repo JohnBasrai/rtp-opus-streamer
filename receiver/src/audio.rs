@@ -136,17 +136,17 @@ mod tests {
     #[test]
     fn test_audio_player_creation() {
         // ---
-        // This test requires an audio device, so it might fail in CI
-        // We'll just verify it doesn't panic
+        // This test requires an audio device, so it may fail in CI
         let result = AudioPlayer::new();
 
         if result.is_err() {
-            // CI environments often don't have audio devices
-            eprintln!(
-                "Audio player creation failed (expected in CI): {:?}",
-                result
-            );
+            // Skip test in environments without audio devices (CI, Docker)
+            println!("Skipping: no audio device available (expected in CI)");
+            return;
         }
+
+        // If we got here, audio device exists and creation succeeded
+        assert!(result.is_ok());
     }
 
     #[test]

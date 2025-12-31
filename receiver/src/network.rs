@@ -81,7 +81,7 @@ impl RtpReceiver {
             Ok(packet) => {
                 self.packets_received += 1;
 
-                if self.packets_received % 100 == 0 {
+                if self.packets_received.is_multiple_of(100) {
                     debug!(
                         "Received {} packets ({} bytes, {} dropped) from {} - seq={}",
                         self.packets_received,

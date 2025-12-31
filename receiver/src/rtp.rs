@@ -94,7 +94,7 @@ impl RtpPacket {
 
         // Byte 0: V(2) | P(1) | X(1) | CC(4)
         // V=2, P=0 (no padding), X=0 (no extension), CC=0 (no CSRC)
-        buf.push((RTP_VERSION << 6) | 0);
+        buf.push(RTP_VERSION << 6);
 
         // Byte 1: M(1) | PT(7)
         // M=0 (not marker), PT=96 (dynamic Opus)

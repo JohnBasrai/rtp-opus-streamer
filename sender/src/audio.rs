@@ -50,7 +50,7 @@ impl AudioData {
     /// Returns the number of complete frames.
     pub fn frame_count(&self) -> usize {
         // ---
-        (self.samples.len() + SAMPLES_PER_FRAME - 1) / SAMPLES_PER_FRAME
+        self.samples.len().div_ceil(SAMPLES_PER_FRAME)
     }
 }
 
@@ -140,7 +140,7 @@ fn convert_to_target_format(samples: &[i16], spec: &WavSpec) -> Result<Vec<i16>>
     info!(
         "Converted to target format: {} samples ({} frames)",
         mono_samples.len(),
-        (mono_samples.len() + SAMPLES_PER_FRAME - 1) / SAMPLES_PER_FRAME
+        mono_samples.len().div_ceil(SAMPLES_PER_FRAME)
     );
 
     Ok(mono_samples)

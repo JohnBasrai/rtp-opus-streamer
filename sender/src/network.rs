@@ -88,7 +88,7 @@ impl RtpSender {
                 self.packets_sent += 1;
                 self.bytes_sent += bytes as u64;
 
-                if self.packets_sent % 100 == 0 {
+                if self.packets_sent.is_multiple_of(100) {
                     debug!(
                         "Sent {} packets ({} bytes) - seq={}",
                         self.packets_sent, self.bytes_sent, packet.sequence

@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RTP packet structure (RFC 3550 compliant)
 - UDP network transmission with async I/O
 - Audio playback via cpal with real-time streaming
-- End-to-end integration test (file → RTP → playback)
+- Integration tests in receiver/tests/ (codec and protocol validation)
 - Comprehensive error handling with resilient operation
 - Full documentation following production standards
 
@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI workflow
 - CONTRIBUTING.md with code style guidelines
 - Visual separator formatting convention
+- Test script matching CI workflow (`test-all.sh`)
+- Local CI testing with `ci-local.sh` (requires act)
 
 ### Changed
 - None
