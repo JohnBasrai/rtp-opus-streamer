@@ -55,7 +55,7 @@ Real-time audio streaming using RTP transport (RFC 3550) and Opus encoding (RFC 
 
 ## Implementation Phases
 
-- [ ] **Phase 1: Core Pipeline** (Week 1) - File → RTP → Playback
+- [x] **Phase 1: Core Pipeline** (Week 1) - File → RTP → Playback ✅
   - Audio file reader, Opus encode/decode, RTP packetization, UDP transport, playback
   
 - [ ] **Phase 2: Network Resilience** (Week 2) - Robust packet handling
@@ -97,14 +97,54 @@ cargo build --release
 
 ## Running
 
-**Sender:**
+### Basic Usage
+
+**Terminal 1 - Start Receiver:**
+```bash
+./target/release/receiver --port 5004
+```
+
+**Terminal 2 - Send Audio:**
 ```bash
 ./target/release/sender --input audio.wav --remote 127.0.0.1:5004
 ```
 
+### Testing with Generated Audio
+
+You can create a test WAV file using various tools:
+
+```bash
+# Using sox (if installed)
+sox -n -r 16000 -c 1 test.wav synth 5 sine 440
+
+# Using ffmpeg (if installed)
+ffmpeg -f lavfi -i "sine=frequency=440:duration=5:sample_rate=16000" -ac 1 test.wav
+```
+
+### Command Line Options
+
+**Sender:**
+```bash
+sender --input <file.wav> --remote <ip:port> [--interval-ms <ms>]
+```
+- `--input`: Path to WAV file (any sample rate, mono or stereo)
+- `--remote`: Destination IP:port (default: 127.0.0.1:5004)
+- `--interval-ms`: Packet send interval in ms (default: 20ms for real-time)
+
 **Receiver:**
 ```bash
-./target/release/receiver --port 5004 --device default
+receiver --port <port>
+```
+- `--port`: UDP port to listen on (default: 5004)
+
+### Example: Local Loopback Test
+
+```bash
+# Terminal 1
+cargo run --bin receiver --release
+
+# Terminal 2
+cargo run --bin sender --release -- --input voice.wav
 ```
 
 ## Testing
