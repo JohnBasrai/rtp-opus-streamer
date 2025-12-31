@@ -2,7 +2,6 @@
 /target/
 **/*.rs.bk
 *.pdb
-Cargo.lock
 
 # IDE
 .vscode/
@@ -20,7 +19,5 @@ Thumbs.db
 *.opus
 *.pcm
 !/fixtures/**/*.wav
-/CHANGES.md
-/EPIC_ISSUE.md
-/make-source-tar.sh
 rtp-opus-streamer-*.tar.gz
+make-source-tar.sh
