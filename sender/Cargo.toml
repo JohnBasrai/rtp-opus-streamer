@@ -1,0 +1,20 @@
+[package]
+name = "sender"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "sender"
+path = "src/main.rs"
+
+[dependencies]
+opus.workspace = true
+hound.workspace = true
+tokio.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap.workspace = true
