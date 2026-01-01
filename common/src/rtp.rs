@@ -25,7 +25,7 @@ const PAYLOAD_TYPE_OPUS: u8 = 96;
 /// - Sequence: Increments by 1 for each packet
 /// - Timestamp: Increments by 320 samples for 20ms @ 16kHz
 /// - SSRC: Synchronization source identifier (random per session)
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RtpPacket {
     // ---
     /// Packet sequence number (wraps at 65535)
@@ -128,7 +128,6 @@ impl RtpPacket {
     /// Returns error if:
     /// - Packet is smaller than minimum header size (12 bytes)
     /// - RTP version is not 2
-    #[allow(dead_code)] // Only used by receiver; duplicated code in Phase 1
     pub fn deserialize(data: &[u8]) -> Result<Self> {
         // ---
         if data.len() < 12 {
@@ -193,6 +192,16 @@ mod tests {
     }
 
     #[test]
+    fn test_rtp_packet_roundtrip() {
+        // ---
+        let original = RtpPacket::new(12345, 98765, 0xDEADBEEF, vec![0xAA, 0xBB, 0xCC]);
+        let serialized = original.serialize().expect("serialization failed");
+        let deserialized = RtpPacket::deserialize(&serialized).expect("deserialization failed");
+
+        assert_eq!(original, deserialized);
+    }
+
+    #[test]
     fn test_rtp_packet_too_small() {
         // ---
         let data = vec![0, 1, 2]; // Only 3 bytes
@@ -219,5 +228,30 @@ mod tests {
         let deserialized = RtpPacket::deserialize(&serialized).expect("deserialization failed");
 
         assert_eq!(deserialized.sequence, 65535);
+    }
+
+    #[test]
+    fn test_empty_payload() {
+        // ---
+        let packet = RtpPacket::new(1, 2, 3, vec![]);
+        let serialized = packet.serialize().expect("serialization failed");
+
+        assert_eq!(serialized.len(), 12); // Just header
+
+        let deserialized = RtpPacket::deserialize(&serialized).expect("deserialization failed");
+        assert!(deserialized.payload.is_empty());
+    }
+
+    #[test]
+    fn test_large_payload() {
+        // ---
+        let large_payload = vec![0xAB; 1500]; // MTU-sized payload
+        let packet = RtpPacket::new(100, 200, 300, large_payload.clone());
+        let serialized = packet.serialize().expect("serialization failed");
+
+        assert_eq!(serialized.len(), 12 + 1500);
+
+        let deserialized = RtpPacket::deserialize(&serialized).expect("deserialization failed");
+        assert_eq!(deserialized.payload, large_payload);
     }
 }

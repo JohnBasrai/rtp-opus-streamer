@@ -4,10 +4,9 @@
 //! to the receiver.
 
 use anyhow::{Context, Result};
+use rtp_opus_common::RtpPacket;
 use tokio::net::UdpSocket;
 use tracing::{debug, error, warn};
-
-use crate::rtp::RtpPacket;
 
 /// UDP sender for RTP packet transmission.
 ///
@@ -16,13 +15,12 @@ use crate::rtp::RtpPacket;
 ///
 /// # Example
 ///
-/// ```no_run
+/// ```ignore
 /// use sender::network::RtpSender;
 ///
-/// # tokio_test::block_on(async {
+/// // Async context required
 /// let sender = RtpSender::new("127.0.0.1:5004").await.unwrap();
 /// // Use sender.send() to transmit packets
-/// # });
 /// ```
 pub struct RtpSender {
     // ---

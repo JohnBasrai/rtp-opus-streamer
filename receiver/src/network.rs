@@ -4,10 +4,9 @@
 //! from the sender.
 
 use anyhow::{Context, Result};
+use rtp_opus_common::RtpPacket;
 use tokio::net::UdpSocket;
 use tracing::{debug, info, warn};
-
-use crate::rtp::RtpPacket;
 
 /// UDP receiver for RTP packet reception.
 ///

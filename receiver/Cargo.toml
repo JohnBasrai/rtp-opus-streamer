@@ -6,11 +6,16 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[lib]
+name = "receiver"
+path = "src/lib.rs"
+
 [[bin]]
 name = "receiver"
-path = "src/main.rs"
+path = "src/bin/receiver.rs"
 
 [dependencies]
+rtp-opus-common = { path = "../common" }
 opus.workspace = true
 cpal.workspace = true
 tokio.workspace = true
