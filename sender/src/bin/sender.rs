@@ -1,21 +1,13 @@
-//! RTP Opus audio sender.
+//! RTP Opus audio sender - CLI binary.
 //!
 //! Reads a WAV file, encodes it to Opus, packetizes into RTP,
 //! and transmits via UDP to a receiver.
 
-mod audio;
-mod codec;
-mod network;
-mod rtp;
-
 use anyhow::{Context, Result};
 use clap::Parser;
-use tracing::{info, warn};
+use tracing::info;
 
-use audio::AudioData;
-use codec::OpusEncoderWrapper;
-use network::RtpSender;
-use rtp::RtpPacket;
+use sender::{stream_audio, OpusEncoderWrapper, RtpSender};
 
 /// RTP Opus Sender - Stream audio files over RTP
 #[derive(Parser, Debug)]
@@ -34,7 +26,7 @@ struct Args {
     ///
     /// Controls pacing of packet transmission. Default 20ms matches
     /// the frame duration for real-time streaming.
-    #[arg(short, long, default_value = "20")]
+    #[arg(short = 't', long, default_value = "20")]
     interval_ms: u64,
 }
 
@@ -52,7 +44,7 @@ async fn main() -> Result<()> {
     // Read and preprocess audio in blocking task
     info!("Reading audio file...");
     let input_path = args.input.clone();
-    let audio = tokio::task::spawn_blocking(move || audio::read_wav(input_path))
+    let audio = tokio::task::spawn_blocking(move || sender::read_wav(input_path))
         .await
         .context("audio reading task failed")??;
 
@@ -82,58 +74,5 @@ async fn main() -> Result<()> {
         packets, bytes
     );
 
-    Ok(())
-}
-
-/// Streams audio frames over RTP.
-///
-/// Encodes each frame with Opus and transmits as RTP packets with
-/// proper timing and sequencing.
-async fn stream_audio(
-    audio: &AudioData,
-    encoder: &mut OpusEncoderWrapper,
-    sender: &mut RtpSender,
-    ssrc: u32,
-    interval_ms: u64,
-) -> Result<()> {
-    // ---
-    let mut sequence: u16 = 0;
-    let mut timestamp: u32 = 0;
-    let mut frame_count = 0;
-
-    for frame in audio.frames() {
-        // Pad last frame if needed
-        let mut frame_data = frame.to_vec();
-        if frame_data.len() < codec::SAMPLES_PER_FRAME {
-            warn!(
-                "Padding last frame: {} samples -> {}",
-                frame_data.len(),
-                codec::SAMPLES_PER_FRAME
-            );
-            frame_data.resize(codec::SAMPLES_PER_FRAME, 0);
-        }
-
-        // Encode frame
-        let payload = encoder
-            .encode(&frame_data)
-            .with_context(|| format!("failed to encode frame {}", frame_count))?;
-
-        // Create and send RTP packet
-        let packet = RtpPacket::new(sequence, timestamp, ssrc, payload);
-        sender
-            .send(&packet)
-            .await
-            .with_context(|| format!("failed to send packet {}", sequence))?;
-
-        // Update sequence and timestamp
-        sequence = sequence.wrapping_add(1);
-        timestamp = timestamp.wrapping_add(codec::SAMPLES_PER_FRAME as u32);
-        frame_count += 1;
-
-        // Pace transmission (real-time simulation)
-        tokio::time::sleep(tokio::time::Duration::from_millis(interval_ms)).await;
-    }
-
-    info!("Streamed {} frames", frame_count);
     Ok(())
 }

@@ -2,8 +2,8 @@
 
 Real-time audio streaming using RTP transport (RFC 3550) and Opus encoding (RFC 6716). Demonstrates network resilience, observability, and adaptive behavior for low-latency audio applications.
 
-**Project Status:** Phase 1 in development  
-**Development Roadmap:** See [Epic Issue](#) (link after creating GitHub issue)
+**Project Status:** Phase 2 complete  
+**Development Roadmap:** See [Project Plan](rtp-opus-streamer-project-notes.md)
 
 ## Architecture
 
@@ -58,8 +58,8 @@ Real-time audio streaming using RTP transport (RFC 3550) and Opus encoding (RFC 
 - [x] **Phase 1: Core Pipeline** (Week 1) - File → RTP → Playback ✅
   - Audio file reader, Opus encode/decode, RTP packetization, UDP transport, playback
   
-- [ ] **Phase 2: Network Resilience** (Week 2) - Robust packet handling
-  - Jitter buffer, packet loss detection, reordering, simple concealment
+- [x] **Phase 2: Network Resilience** (Week 2) - Robust packet handling ✅
+  - Jitter buffer (60ms configurable), packet reordering, loss detection, statistics tracking, PLC
   
 - [ ] **Phase 3: Observability** (Week 3) - Metrics and measurement
   - Prometheus metrics, latency measurement, quality metrics, logging
@@ -102,6 +102,9 @@ cargo build --release
 **Terminal 1 - Start Receiver:**
 ```bash
 ./target/release/receiver --port 5004
+
+# With custom jitter buffer depth (default: 60ms)
+./target/release/receiver --port 5004 --buffer-depth-ms 100
 ```
 
 **Terminal 2 - Send Audio:**

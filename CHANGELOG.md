@@ -7,7 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2024-12-31
+
 ### Added
+
+**Phase 2: Network Resilience**
+- Common RTP library crate (eliminates code duplication)
+- Jitter buffer with configurable depth (default 60ms)
+- Packet reordering based on sequence numbers
+- Statistics tracking (loss rate, jitter, reordering events)
+- Enhanced packet loss concealment using Opus PLC
+- Sender and receiver restructured as libraries for testability
+- Network simulator for integration testing
+- End-to-end integration tests with simulated network conditions
+- Late packet detection and handling
 
 **Phase 1: Core Pipeline**
 - WAV file reading with automatic resampling to 16kHz mono
@@ -27,7 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Local CI testing with `ci-local.sh` (requires act)
 
 ### Changed
-- None
+- Sender and receiver now expose library APIs
+- RTP packet code moved to common crate
+- Receiver binary path changed to src/bin/receiver.rs
+- Sender binary path changed to src/bin/sender.rs
 
 ### Fixed
 - None
