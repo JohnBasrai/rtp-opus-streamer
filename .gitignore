@@ -19,5 +19,6 @@ Thumbs.db
 *.opus
 *.pcm
 !/fixtures/**/*.wav
+!/samples/**/*.wav
 rtp-opus-streamer-*.tar.gz
 make-source-tar.sh
