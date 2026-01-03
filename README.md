@@ -3,7 +3,7 @@
 Real-time audio streaming using RTP transport (RFC 3550) and Opus encoding (RFC 6716). Demonstrates network resilience, observability, and adaptive behavior for low-latency audio applications.
 
 **Project Status:** Phase 3 complete  
-**Development Roadmap:** See [Project Plan](rtp-opus-streamer-project-notes.md)
+**Development Roadmap:** See [Project Plan](https://github.com/JohnBasrai/rtp-opus-streamer/issues/1)
 
 ## Architecture
 
