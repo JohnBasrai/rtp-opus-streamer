@@ -925,7 +925,7 @@ dependencies = [
 
 [[package]]
 name = "receiver"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -977,7 +977,7 @@ checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 
 [[package]]
 name = "rtp-opus-common"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "atty",
@@ -1017,7 +1017,7 @@ checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
 name = "sender"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "clap",
