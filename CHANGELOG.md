@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-01-03
+
+### Added
+- Support for 32-bit float WAV files with automatic conversion to 16-bit PCM
+- Explicit error messages for unsupported WAV formats (non-16-bit PCM, non-32-bit float)
+
+### Changed
+- Audio loading errors now logged with tracing before exit instead of raw error output
+- Improved error context in WAV reading path
+
+### Fixed
+- Graceful error handling for incompatible audio file formats
+
 ## [0.3.0] - 2026-01-02
 
 **Phase 3: Observability - Metrics and Measurement Infrastructure**
