@@ -9,7 +9,7 @@ cargo fmt --check
 
 echo ""
 echo "2. Running clippy..."
-cargo clippy --color never --all-targets --all-features -- -D warnings
+cargo clippy --no-deps --color never --all-targets --all-features -- -D warnings
 
 echo ""
 echo "3. Building all targets..."
