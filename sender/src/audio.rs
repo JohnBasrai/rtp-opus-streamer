@@ -96,11 +96,42 @@ pub fn read_wav<P: AsRef<Path>>(path: P) -> Result<AudioData> {
         spec.sample_rate, spec.channels, spec.bits_per_sample
     );
 
-    // Read all samples as i16
-    let raw_samples: Vec<i16> = reader
-        .samples::<i16>()
-        .collect::<Result<Vec<_>, _>>()
-        .context("failed to read WAV samples")?;
+    use hound::SampleFormat;
+
+    let raw_samples: Vec<i16> = match (spec.sample_format, spec.bits_per_sample) {
+        // --- Native path
+        (SampleFormat::Int, 16) => reader
+            .samples::<i16>()
+            .collect::<Result<Vec<_>, _>>()
+            .context("failed to read 16-bit PCM WAV samples")?,
+
+        // --- Float path
+        (SampleFormat::Float, 32) => reader
+            .samples::<f32>()
+            .collect::<Result<Vec<_>, _>>()
+            .context("failed to read 32-bit float WAV samples")?
+            .into_iter()
+            .map(|s| {
+                let clamped = s.clamp(-1.0, 1.0);
+                (clamped * i16::MAX as f32) as i16
+            })
+            .collect(),
+
+        // --- Explicit rejection (GOOD error)
+        (SampleFormat::Int, bits) => {
+            anyhow::bail!(
+                "unsupported integer PCM WAV format: {}-bit (only 16-bit PCM is supported)",
+                bits
+            );
+        }
+
+        (SampleFormat::Float, bits) => {
+            anyhow::bail!(
+                "unsupported float WAV format: {}-bit (only 32-bit float is supported)",
+                bits
+            );
+        }
+    };
 
     info!("Read {} samples from file", raw_samples.len());
 
