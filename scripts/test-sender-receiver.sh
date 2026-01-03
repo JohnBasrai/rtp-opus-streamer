@@ -22,7 +22,7 @@ DURATION="${1:-15}"
 SENDER_METRICS_ADDR="127.0.0.1:9100"
 RECEIVER_METRICS_ADDR="127.0.0.1:9200"
 RTP_PORT="5004"
-AUDIO_FILE="${AUDIO_FILE:-samples/test.wav}"
+AUDIO_FILE="${AUDIO_FILE:-samples/gc.wav}"
 
 echo "=== Manual sender/receiver system test ==="
 echo

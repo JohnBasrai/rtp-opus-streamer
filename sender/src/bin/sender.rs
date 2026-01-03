@@ -125,9 +125,16 @@ async fn main() -> Result<()> {
     // Read and preprocess audio in blocking task
     info!("Reading audio file...");
     let input_path = args.input.clone();
-    let audio = tokio::task::spawn_blocking(move || sender::read_wav(input_path))
+    let audio = match tokio::task::spawn_blocking(move || sender::read_wav(input_path))
         .await
-        .context("audio reading task failed")??;
+        .context("audio reading task failed")?
+    {
+        Ok(audio) => audio,
+        Err(err) => {
+            tracing::error!("Failed to read audio file: {err}");
+            std::process::exit(1);
+        }
+    };
 
     info!(
         "Loaded {:.2}s of audio ({} frames)",
