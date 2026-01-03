@@ -95,6 +95,15 @@ impl ReceiverStats {
         self.maybe_log();
     }
 
+    /// Records a received packet and returns how many packets were detected as lost
+    /// due to a sequence gap.
+    pub fn record_packet_and_get_loss(&mut self, sequence: u16, was_reordered: bool) -> u64 {
+        // ---
+        let before = self.packets_lost;
+        self.record_packet(sequence, was_reordered);
+        self.packets_lost.saturating_sub(before)
+    }
+
     /// Records a packet that arrived too late to be played.
     pub fn record_late_packet(&mut self) {
         // ---

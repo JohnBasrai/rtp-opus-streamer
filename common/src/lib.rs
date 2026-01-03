@@ -1,8 +1,13 @@
-//! Common RTP utilities shared between sender and receiver.
+//! Shared library used by both binaries.
 //!
-//! This crate provides the core RTP packet structure and serialization
-//! logic used by both the sender and receiver components.
+//! This crate is the **public gateway** for all shared functionality. Per EMBP,
+//! downstream crates should import through `common::*` exports and should not
+//! drill into internal module structure.
 
-pub mod rtp;
+mod cli;
+mod observability;
+mod rtp;
 
+pub use cli::ColorWhen;
+pub use observability::{init_tracing, MetricsContext, MetricsServerConfig};
 pub use rtp::RtpPacket;
