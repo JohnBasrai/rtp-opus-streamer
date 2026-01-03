@@ -33,23 +33,48 @@ impl From<ColorArg> for ColorWhen {
 struct Args {
     // ---
     /// Port to listen on
-    #[arg(short, long, default_value = "5004")]
+    #[arg(
+        short,
+        long,
+        default_value_t = 5004,
+        help = "Port to listen on",
+        long_help = "UDP port to listen on for incoming RTP packets."
+    )]
     port: u16,
 
-    /// Audio output device (not yet implemented - uses default)
-    #[arg(short, long, default_value = "default")]
-    device: String,
-
     /// Jitter buffer depth in milliseconds
-    #[arg(short = 'b', long, default_value = "60")]
+    #[arg(
+        short = 'b',
+        long,
+        default_value_t = 60,
+        help = "Jitter buffer depth in milliseconds",
+        long_help = "Jitter buffer depth in milliseconds.\n\n\
+                     Controls how much packet reordering and jitter the receiver can tolerate.\n\
+                     Higher values improve robustness at the cost of additional latency."
+    )]
     buffer_depth_ms: u32,
 
     /// Prometheus metrics bind address (serves `GET /metrics`).
-    #[arg(long, default_value = "127.0.0.1:9200")]
+    #[arg(
+        long,
+        default_value = "127.0.0.1:9200",
+        help = "Prometheus metrics bind address",
+        long_help = "Bind address for the Prometheus metrics endpoint.\n\n\
+                     Metrics are exposed via HTTP at GET /metrics."
+    )]
     metrics_bind: String,
 
     /// Coloring
-    #[arg(long, value_enum, default_value = "auto")]
+    #[arg(
+        long,
+        value_enum,
+        default_value_t = ColorArg::Auto,
+        help = "Coloring",
+        long_help = "Controls colored output.\n\n\
+                     auto: Enable colors when stdout is a TTY and EMACS is not set.\n\
+                     always: Always enable colors.\n\
+                     never: Disable colors."
+    )]
     color: ColorArg,
 }
 
@@ -63,7 +88,7 @@ async fn main() -> Result<()> {
     init_tracing(args.color.into())?;
     info!("Starting RTP Opus receiver v{VERSION}");
     info!("Listening on port: {}", args.port);
-    info!("Output device: {}", args.device);
+    info!("Output device: {}", "default");
     info!("Jitter buffer depth: {}ms", args.buffer_depth_ms);
     info!("Metrics bind: {}", args.metrics_bind);
 

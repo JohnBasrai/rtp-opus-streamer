@@ -33,30 +33,71 @@ impl From<ColorArg> for ColorWhen {
 struct Args {
     // ---
     /// Input audio file (WAV format)
-    #[arg(short, long)]
+    #[arg(
+        short,
+        long,
+        help = "Input audio file (WAV format)",
+        long_help = "Path to an input WAV file to be streamed over RTP.\n\n\
+                     The file is decoded, packetized, and transmitted in real time."
+    )]
     input: String,
 
     /// Remote address (IP:port) to send to
-    #[arg(short, long, default_value = "127.0.0.1:5004")]
+    #[arg(
+        short,
+        long,
+        default_value = "127.0.0.1:5004",
+        help = "Remote address (IP:port) to send to",
+        long_help = "Remote address of the RTP receiver.\n\n\
+                     The sender transmits RTP packets to this address."
+    )]
     remote: String,
 
     /// Packet transmission interval in milliseconds
     ///
     /// Controls pacing of packet transmission. Default 20ms matches
     /// the frame duration for real-time streaming.
-    #[arg(short = 't', long, default_value = "20")]
+    #[arg(
+        short = 't',
+        long,
+        default_value_t = 20,
+        help = "Packet transmission interval in milliseconds",
+        long_help = "Packet transmission interval in milliseconds.\n\n\
+                     Controls the pacing of RTP packet transmission.\n\
+                     The default of 20ms matches typical Opus frame duration."
+    )]
     interval_ms: u64,
 
-    /// Replay input audio continuously (default). Use `--no-loop` to play once and exit.
-    #[arg(long = "no-loop", default_value_t = true, action = clap::ArgAction::SetFalse)]
-    loop_audio: bool,
+    #[arg(
+        long = "no-loop",
+        help = "Play input audio once and exit",
+        long_help = "Disable looping of the input audio file.\n\n\
+                     By default, the sender replays the input file continuously.\n\
+                     When this flag is set, the file is played once and the sender exits."
+    )]
+    no_loop: bool,
 
     /// Prometheus metrics bind address (serves `GET /metrics`).
-    #[arg(long, default_value = "127.0.0.1:9100")]
+    #[arg(
+        long,
+        default_value = "127.0.0.1:9100",
+        help = "Prometheus metrics bind address",
+        long_help = "Bind address for the Prometheus metrics endpoint.\n\n\
+                     Metrics are exposed via HTTP at GET /metrics."
+    )]
     metrics_bind: String,
 
     /// Coloring
-    #[arg(long, value_enum, default_value = "auto")]
+    #[arg(
+        long,
+        value_enum,
+        default_value_t = ColorArg::Auto,
+        help = "Coloring",
+        long_help = "Controls colored output.\n\n\
+                     auto: Enable colors when stdout is a TTY and EMACS is not set.\n\
+                     always: Always enable colors.\n\
+                     never: Disable colors."
+    )]
     color: ColorArg,
 }
 
@@ -74,7 +115,7 @@ async fn main() -> Result<()> {
     info!("Input file: {}", args.input);
     info!("Remote address: {}", args.remote);
     info!("Transmission interval: {}ms", args.interval_ms);
-    info!("Loop audio: {}", args.loop_audio);
+    info!("Loop audio: {}", !args.no_loop);
     info!("Metrics bind: {}", args.metrics_bind);
 
     let metrics = MetricsContext::new("sender")?;
@@ -113,7 +154,7 @@ async fn main() -> Result<()> {
         &metrics,
         ssrc,
         args.interval_ms,
-        args.loop_audio,
+        args.no_loop,
     )
     .await?;
 
