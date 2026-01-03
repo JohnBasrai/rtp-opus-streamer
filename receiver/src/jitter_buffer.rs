@@ -33,6 +33,7 @@ impl Default for JitterBufferConfig {
 #[derive(Debug, Clone)]
 struct BufferedPacket {
     packet: RtpPacket,
+    arrival: Instant,
 }
 
 /// Jitter buffer for packet reordering and playout smoothing.
@@ -106,6 +107,15 @@ impl JitterBuffer {
     /// Returns `true` if packet was inserted, `false` if discarded (late or duplicate).
     pub fn insert(&mut self, packet: RtpPacket) -> bool {
         // ---
+        self.insert_with_arrival(packet, Instant::now())
+    }
+
+    /// Inserts a packet with an explicit arrival timestamp.
+    ///
+    /// This enables receiver-side latency measurements without depending on
+    /// wall-clock synchronization between sender and receiver.
+    pub fn insert_with_arrival(&mut self, packet: RtpPacket, arrival: Instant) -> bool {
+        // ---
         // Initialize on first packet
         if self.next_sequence.is_none() {
             self.next_sequence = Some(packet.sequence);
@@ -135,7 +145,7 @@ impl JitterBuffer {
         }
 
         // Insert in sequence order
-        let buffered = BufferedPacket { packet };
+        let buffered = BufferedPacket { packet, arrival };
 
         let insert_pos = self
             .buffer
@@ -154,14 +164,8 @@ impl JitterBuffer {
         true
     }
 
-    /// Retrieves the next packet ready for playout.
-    ///
-    /// Returns `None` if:
-    /// - Buffer is still priming (waiting for initial fill)
-    /// - Next expected packet hasn't arrived yet
-    ///
-    /// Returns `Some(packet)` when ready to play.
-    pub fn get_next(&mut self) -> Option<RtpPacket> {
+    /// Retrieves the next packet along with its buffer delay.
+    pub fn get_next_with_delay(&mut self) -> Option<(RtpPacket, Duration)> {
         // ---
         // Wait for buffer to prime (fill to target depth)
         if !self.is_primed {
@@ -173,7 +177,6 @@ impl JitterBuffer {
             }
         }
 
-        // Get next packet if available
         let next_seq = self.next_sequence?;
 
         if let Some(pos) = self
@@ -183,10 +186,23 @@ impl JitterBuffer {
         {
             let buffered = self.buffer.remove(pos).unwrap();
             self.next_sequence = Some(next_seq.wrapping_add(1));
-            return Some(buffered.packet);
+            let delay = buffered.arrival.elapsed();
+            return Some((buffered.packet, delay));
         }
 
         None
+    }
+
+    /// Retrieves the next packet ready for playout.
+    ///
+    /// Returns `None` if:
+    /// - Buffer is still priming (waiting for initial fill)
+    /// - Next expected packet hasn't arrived yet
+    ///
+    /// Returns `Some(packet)` when ready to play.
+    pub fn get_next(&mut self) -> Option<RtpPacket> {
+        // ---
+        self.get_next_with_delay().map(|(p, _)| p)
     }
 
     /// Checks if we should start playout (buffer priming complete).

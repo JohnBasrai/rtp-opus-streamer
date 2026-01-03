@@ -21,6 +21,12 @@ tokio = { version = "1.35", features = ["full"] }
 # Utilities
 anyhow = "1.0"
 tracing = "0.1"
-tracing-subscriber = "0.3"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
 clap = { version = "4.4", features = ["derive"] }
 rand = "0.8"
+
+# Observability
+prometheus = "0.13"
+hyper = { version = "0.14", features = ["server", "http1", "tcp"] }
+atty = "0.2"

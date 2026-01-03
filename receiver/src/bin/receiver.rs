@@ -8,6 +8,24 @@ use clap::Parser;
 use tracing::info;
 
 use receiver::{receive_loop, AudioPlayer, JitterBufferConfig, OpusDecoderWrapper, RtpReceiver};
+use rtp_opus_common::{init_tracing, ColorWhen, MetricsContext, MetricsServerConfig};
+
+#[derive(clap::ValueEnum, Debug, Clone, Copy)]
+enum ColorArg {
+    Auto,
+    Always,
+    Never,
+}
+
+impl From<ColorArg> for ColorWhen {
+    fn from(v: ColorArg) -> Self {
+        match v {
+            ColorArg::Auto => ColorWhen::Auto,
+            ColorArg::Always => ColorWhen::Always,
+            ColorArg::Never => ColorWhen::Never,
+        }
+    }
+}
 
 /// RTP Opus Receiver - Receive and play audio streams
 #[derive(Parser, Debug)]
@@ -25,18 +43,33 @@ struct Args {
     /// Jitter buffer depth in milliseconds
     #[arg(short = 'b', long, default_value = "60")]
     buffer_depth_ms: u32,
+
+    /// Prometheus metrics bind address (serves `GET /metrics`).
+    #[arg(long, default_value = "127.0.0.1:9200")]
+    metrics_bind: String,
+
+    /// Coloring
+    #[arg(long, value_enum, default_value = "auto")]
+    color: ColorArg,
 }
+
+/// Capture version number from Cargo.toml
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // ---
-    tracing_subscriber::fmt::init();
-
     let args = Args::parse();
-    info!("Starting RTP Opus receiver");
+    init_tracing(args.color.into())?;
+    info!("Starting RTP Opus receiver v{VERSION}");
     info!("Listening on port: {}", args.port);
     info!("Output device: {}", args.device);
     info!("Jitter buffer depth: {}ms", args.buffer_depth_ms);
+    info!("Metrics bind: {}", args.metrics_bind);
+
+    let metrics = MetricsContext::new("receiver")?;
+    let metrics_bind = args.metrics_bind.parse().context("invalid metrics bind")?;
+    let _metrics_task = metrics.spawn_metrics_server(MetricsServerConfig::new(metrics_bind));
 
     // Create decoder and network receiver
     let mut decoder = OpusDecoderWrapper::new().context("failed to create decoder")?;
@@ -56,7 +89,14 @@ async fn main() -> Result<()> {
     info!("Ready to receive audio...");
 
     // Run receiver loop
-    receive_loop(&mut receiver, &mut decoder, &mut player, jitter_config).await?;
+    receive_loop(
+        &mut receiver,
+        &mut decoder,
+        &mut player,
+        jitter_config,
+        &metrics,
+    )
+    .await?;
 
     Ok(())
 }
