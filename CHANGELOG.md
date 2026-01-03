@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-01-02
+
+**Phase 3: Observability - Metrics and Measurement Infrastructure**
+
+  * **Added**
+    * Prometheus metrics for sender and receiver
+    * Shared `common::observability` layer
+    * Metrics HTTP endpoint for long-lived processes
+    * Manual sender/receiver test script
+  * **Changed**
+    * Standardized CLI color handling
+    * Clarified sender/receiver lifecycle as long-running processes
+  * **Internal**
+    * Enforced EMBP boundaries via `common/lib.rs`
+    * CI and CLI ergonomics cleanup (post-merge)
+
+_No “Unreleased” leftovers after this._
+
 ## [0.2.0] - 2024-12-31
 
 ### Added
