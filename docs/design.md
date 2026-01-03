@@ -226,19 +226,153 @@ fn test_end_to_end_with_loss() {
 - Network conditions (WiFi, LTE)
 - Multi-hour streaming stability
 
+## Phase 3: Observability (Completed)
+
+Phase 3 introduces first-class observability to `rtp-opus-streamer`. The goal is not ad-hoc logging, but **continuous visibility into system health, network behavior, and audio pipeline performance** for long-running sender and receiver processes.
+
+### Design Goals
+
+1. **Low-overhead instrumentation**
+   - Metrics must not meaningfully impact the real-time audio path
+   - Hot paths are instrumented carefully and sparingly
+
+2. **Process-oriented observability**
+   - Sender and receiver are treated as long-lived services, not short-lived commands
+   - Metrics reflect system behavior over time, not per-invocation summaries
+
+3. **Operational clarity**
+   - Metrics should answer:
+     - Is audio flowing?
+     - Is the network degrading?
+     - Is latency accumulating?
+     - Are packets being lost, reordered, or delayed?
+
+4. **Production-aligned tooling**
+   - Prometheus-compatible metrics
+   - HTTP-based scraping model
+   - No custom collectors or proprietary formats
+
+---
+
+### Observability Architecture
+
+Both sender and receiver expose metrics via an embedded HTTP endpoint suitable for Prometheus scraping.
+
+```
+
+┌───────────────────────────────┐
+│   Sender / Receiver Process   │
+│                               │
+│  ┌─────────────────────────┐  │
+│  │ Audio + RTP Pipeline    │  │
+│  └───────────┬─────────────┘  │
+│              │                │
+│  ┌───────────▼─────────────┐  │
+│  │ Observability Layer     │  │
+│  │ (metrics + registry)    │  │
+│  └───────────┬─────────────┘  │
+│              │                │
+│  ┌───────────▼─────────────┐  │
+│  │ HTTP Metrics Endpoint   │  │
+│  └───────────┬─────────────┘  │
+│              │                │
+└──────────────┼────────────────┘
+│
+Prometheus Scraper
+
+```
+Prometheus scrapes metrics from the HTTP endpoint exposed by each process.
+
+
+This architecture ensures:
+- Instrumentation is **centralized**
+- Metrics are **consistent** across binaries
+- Observability concerns do **not leak** into core audio logic
+
+---
+
+### Shared Observability Layer
+
+A shared observability module is used by both sender and receiver to enforce consistency and
+avoid duplication.
+
+**Responsibilities:**
+- Metrics registration and lifecycle
+- Common counters, gauges, and histograms
+- Encapsulation of Prometheus client details
+
+**Non-Goals:**
+- No business logic
+- No audio or RTP semantics
+- No dependency on CLI parsing or runtime configuration
+
+This aligns with Explicit Module Boundary Pattern (EMBP) principles:
+- Observability is a *service module*, not a cross-cutting concern
+- Sender and receiver depend on it explicitly, not implicitly
+
+---
+
+### Metrics Philosophy
+
+Metrics are designed around **questions**, not internal data structures.
+
+Examples of questions Phase 3 metrics answer:
+- Are packets being lost or merely reordered?
+- Is jitter increasing over time?
+- Is end-to-end latency stable or drifting?
+- Is the system keeping up with real-time constraints?
+
+Metric cardinality is intentionally kept low to ensure:
+- Predictable memory usage
+- Prometheus scalability
+- Safe long-running operation
+
+Detailed metric names and types are intentionally omitted from this document; they are considered an implementation detail rather than a design contract to preserve refactoring freedom and avoid over-specifying the public observability contract.
+
+---
+
+### Manual Testing Strategy (Phase 3)
+
+While Phase 2 emphasized deterministic, in-process testing, Phase 3 adds a **manual test script**
+to validate observability under real execution conditions.
+
+Rationale:
+- Observability correctness depends on *time*, *duration*, and *steady-state behavior*
+- These properties are difficult to validate in unit or short-lived integration tests
+- Manual tests complement (not replace) automated coverage
+
+The manual workflow validates:
+- Metrics endpoint availability
+- Counter monotonicity
+- Gauge stability
+- Histogram population over time
+- Behavior under real packet loss and jitter
+
+---
+
+### Why Observability Was Added in Phase 3
+
+Observability is intentionally **not** a Phase 1 or Phase 2 concern.
+
+By Phase 3:
+- The audio pipeline is stable
+- Network behavior is well-defined
+- Failure modes are understood
+
+This makes Phase 3 the first point where metrics provide **signal instead of noise**.
+
+Adding observability earlier would have produced misleading data while core behavior was still in flux.
+
 ## Future Enhancements
 
-1. **Phase 3: Observability**
-   - Prometheus metrics endpoint
-   - OpenTelemetry tracing
-   - Quality dashboards
+1. **Phase 4: Adaptive Behavior**
+   - Opus in-band FEC (forward error correction)
+   - Sender-side bitrate adaptation
+   - RTCP-based feedback loops
+   - Dynamic jitter buffer depth adjustment
 
-2. **Phase 4: Adaptive Behavior**
-   - FEC (Opus in-band)
-   - Bitrate adaptation (RTCP feedback)
-   - DTX (Discontinuous Transmission)
-
-3. **Beyond:**
+2. **Beyond Phase 4**
    - WebRTC interop (DTLS-SRTP)
-   - Multi-codec support (fallback)
-   - Forwarding server (SFU architecture)
+   - Multi-codec support and negotiation
+   - Forwarding server (SFU-style architecture)
+   - Multi-stream and multi-receiver topologies

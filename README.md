@@ -2,7 +2,7 @@
 
 Real-time audio streaming using RTP transport (RFC 3550) and Opus encoding (RFC 6716). Demonstrates network resilience, observability, and adaptive behavior for low-latency audio applications.
 
-**Project Status:** Phase 2 complete  
+**Project Status:** Phase 3 complete  
 **Development Roadmap:** See [Project Plan](rtp-opus-streamer-project-notes.md)
 
 ## Architecture
@@ -57,13 +57,13 @@ Real-time audio streaming using RTP transport (RFC 3550) and Opus encoding (RFC 
 
 - [x] **Phase 1: Core Pipeline** (Week 1) - File → RTP → Playback ✅
   - Audio file reader, Opus encode/decode, RTP packetization, UDP transport, playback
-  
+
 - [x] **Phase 2: Network Resilience** (Week 2) - Robust packet handling ✅
   - Jitter buffer (60ms configurable), packet reordering, loss detection, statistics tracking, PLC
-  
-- [ ] **Phase 3: Observability** (Week 3) - Metrics and measurement
-  - Prometheus metrics, latency measurement, quality metrics, logging
-  
+
+- [x] **Phase 3: Observability** (Week 3) - Metrics and measurement
+  - Prometheus-based metrics, latency measurement, and system observability
+
 - [ ] **Phase 4: Adaptive Behavior** (Week 4+) - Production-quality features
   - Forward Error Correction, adaptive bitrate, congestion control, multi-stream
 
@@ -163,7 +163,7 @@ cargo test --test integration
 cargo bench
 ```
 
-## Design Decisions
+## Key Design Choices (Summary)
 
 **Frame Size: 20ms**  
 Opus supports 2.5, 5, 10, 20, 40, 60ms frames. Using 20ms balances:
