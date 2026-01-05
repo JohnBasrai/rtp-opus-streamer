@@ -7,7 +7,10 @@ use anyhow::{Context, Result};
 use clap::Parser;
 use tracing::info;
 
-use receiver::{receive_loop, AudioPlayer, JitterBufferConfig, OpusDecoderWrapper, RtpReceiver};
+use receiver::{
+    receive_loop, AnalyzerConfig, AudioAnalyzer, AudioPlayer, JitterBufferConfig,
+    OpusDecoderWrapper, RtpReceiver,
+};
 use rtp_opus_common::{init_tracing, ColorWhen, MetricsContext, MetricsServerConfig};
 
 #[derive(clap::ValueEnum, Debug, Clone, Copy)]
@@ -76,6 +79,17 @@ struct Args {
                      never: Disable colors."
     )]
     color: ColorArg,
+
+    /// Enable real-time audio analysis
+    #[arg(
+        long,
+        help = "Enable real-time FFT-based spectral analysis",
+        long_help = "Enable real-time FFT-based spectral analysis.\n\n\
+                     Extracts dominant frequency, spectral energy, and spectral centroid\n\
+                     from decoded audio. Features are logged at DEBUG level and exposed\n\
+                     via Prometheus metrics."
+    )]
+    analyze: bool,
 }
 
 /// Capture version number from Cargo.toml
@@ -111,6 +125,14 @@ async fn main() -> Result<()> {
         max_packets: 100,
     };
 
+    // Create audio analyzer if requested
+    let mut analyzer = if args.analyze {
+        info!("Audio analysis enabled");
+        Some(AudioAnalyzer::new(AnalyzerConfig::default())?)
+    } else {
+        None
+    };
+
     info!("Ready to receive audio...");
 
     // Run receiver loop
@@ -119,6 +141,7 @@ async fn main() -> Result<()> {
         &mut decoder,
         &mut player,
         jitter_config,
+        analyzer.as_mut(),
         &metrics,
     )
     .await?;
