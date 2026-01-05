@@ -15,8 +15,8 @@
 //! // Process each decoded audio frame (320 samples @ 16kHz)
 //! let samples: Vec<i16> = vec![0; 320];
 //! if let Some(features) = analyzer.process_frame(&samples) {
-//!     println!("Dominant frequency: {:.1} Hz", features.dominant_frequency);
-//!     println!("Spectral energy: {:.1} dB", features.spectral_energy);
+//!     println!("Dominant frequency: {:.1} Hz", features.dominant_frequency_hz);
+//!     println!("Spectral energy: {:.1} dB", features.spectral_energy_db);
 //! }
 //! ```
 

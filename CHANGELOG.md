@@ -9,7 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Audio analysis module foundation (Phase 4 - Milestone 1A)
-- Sample buffer with overlapped windowing for FFT preparation
+  - Sample buffer with overlapped windowing for FFT preparation
+- FFT processor with Hann windowing (Phase 4B)
+  - 1024-point FFT with pre-computed window
+  - Magnitude spectrum computation
+  - Performance metrics integration
+- Spectral feature extraction (Phase 4C)
+  - Dominant frequency detection
+  - Spectral energy in dB
+  - Spectral centroid (brightness measure)
 - rustfft dependency for spectral analysis
 
 ## [0.3.1] - 2026-01-03
