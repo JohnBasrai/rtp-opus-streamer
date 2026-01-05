@@ -112,10 +112,50 @@ impl AudioAnalyzer {
         // Add samples to buffer
         if let Some(window) = self.buffer.add_samples(samples) {
             // Window ready - perform FFT
+            let fft_start = std::time::Instant::now();
             let spectrum = self.fft.process(&window);
+            let _fft_duration = fft_start.elapsed(); // Timing available for instrumentation
 
             // Extract features from magnitude spectrum
             Some(extract_features(&spectrum, self.sample_rate))
+        } else {
+            None
+        }
+    }
+
+    /// Process an audio frame with metrics instrumentation.
+    ///
+    /// Same as `process_frame()` but records performance metrics.
+    ///
+    /// # Arguments
+    ///
+    /// * `samples` - PCM audio samples (i16 format)
+    /// * `metrics` - Metrics context for recording performance
+    ///
+    /// # Returns
+    ///
+    /// `Some(SpectralFeatures)` when a complete window is ready for analysis,
+    /// `None` while accumulating samples.
+    pub fn process_frame_with_metrics(
+        &mut self,
+        samples: &[i16],
+        metrics: &rtp_opus_common::MetricsContext,
+    ) -> Option<SpectralFeatures> {
+        // ---
+        // Add samples to buffer
+        if let Some(window) = self.buffer.add_samples(samples) {
+            // Window ready - perform FFT with timing
+            let fft_start = std::time::Instant::now();
+            let spectrum = self.fft.process(&window);
+            metrics
+                .analysis_fft_processing_seconds
+                .observe(fft_start.elapsed().as_secs_f64());
+
+            // Extract features from magnitude spectrum
+            let features = extract_features(&spectrum, self.sample_rate);
+            metrics.analysis_features_extracted_total.inc();
+
+            Some(features)
         } else {
             None
         }
