@@ -165,6 +165,8 @@ Test scripts in `scripts/` match the CI workflow exactly:
 
 - **`test-all.sh`**: Runs formatting, clippy, build, and all tests (same as CI)
 - **`ci-local.sh`**: Runs GitHub Actions locally using [act](https://github.com/nektos/act)
+- **`test-sender-receiver.sh`**: Manual end-to-end test with sender and receiver (not run in CI)
+- **`analyze-performance.sh`**: Analyzes captured Prometheus metrics against design targets
 
 ### Integration Tests
 

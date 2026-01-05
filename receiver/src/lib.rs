@@ -3,12 +3,14 @@
 //! Provides audio reception and decoding functionality from RTP streams.
 //! This library can be used to build custom receivers or for integration testing.
 
+pub mod analysis;
 pub mod audio;
 pub mod codec;
 pub mod jitter_buffer;
 pub mod network;
 pub mod stats;
 
+pub use analysis::{AnalyzerConfig, AudioAnalyzer, SpectralFeatures};
 pub use audio::AudioPlayer;
 pub use codec::OpusDecoderWrapper;
 pub use jitter_buffer::{JitterBuffer, JitterBufferConfig};
@@ -31,6 +33,8 @@ use tracing::warn;
 /// * `decoder` - Opus decoder instance
 /// * `player` - Audio playback device
 /// * `jitter_config` - Jitter buffer configuration
+/// * `analyzer` - Optional audio analyzer for spectral analysis
+/// * `metrics` - Metrics context for Prometheus instrumentation
 ///
 /// # Errors
 ///
@@ -40,6 +44,7 @@ pub async fn receive_loop(
     decoder: &mut OpusDecoderWrapper,
     player: &mut AudioPlayer,
     jitter_config: JitterBufferConfig,
+    mut analyzer: Option<&mut analysis::AudioAnalyzer>,
     metrics: &rtp_opus_common::MetricsContext,
 ) -> Result<()> {
     // ---
@@ -125,6 +130,21 @@ pub async fn receive_loop(
                     metrics
                         .decode_seconds
                         .observe(decode_start.elapsed().as_secs_f64());
+
+                    // Perform audio analysis if enabled
+                    if let Some(ref mut analyzer) = analyzer {
+                        if let Some(features) =
+                            analyzer.process_frame_with_metrics(&samples, metrics)
+                        {
+                            tracing::debug!(
+                                dominant_freq_hz = %format!("{:.1}", features.dominant_frequency_hz),
+                                spectral_energy_db = %format!("{:.1}", features.spectral_energy_db),
+                                spectral_centroid_hz = %format!("{:.1}", features.spectral_centroid_hz),
+                                "audio analysis"
+                            );
+                        }
+                    }
+
                     player.play(&samples);
                     metrics
                         .receiver_pipeline_seconds

@@ -3,7 +3,7 @@ members = ["common", "sender", "receiver"]
 resolver = "2"
 
 [workspace.package]
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 authors = ["Your Name <your.email@example.com>"]
 license = "MIT OR Apache-2.0"
@@ -30,3 +30,6 @@ rand = "0.8"
 prometheus = "0.13"
 hyper = { version = "0.14", features = ["server", "http1", "tcp"] }
 atty = "0.2"
+
+# Analysis (Phase 4)
+rustfft = "6.2"

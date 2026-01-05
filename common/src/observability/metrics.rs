@@ -57,6 +57,10 @@ pub struct MetricsContext {
     pub jitter_buffer_delay_seconds: Histogram,
     pub network_transit_seconds: Histogram,
     pub receiver_pipeline_seconds: Histogram,
+
+    // Analysis metrics (Phase 4)
+    pub analysis_fft_processing_seconds: Histogram,
+    pub analysis_features_extracted_total: IntCounter,
 }
 
 impl MetricsContext {
@@ -127,6 +131,16 @@ impl MetricsContext {
             "Receiver pipeline time from packet arrival to audio enqueue (seconds)",
         ))?;
 
+        // Analysis metrics (Phase 4)
+        let analysis_fft_processing_seconds = Histogram::with_opts(HistogramOpts::new(
+            "analysis_fft_processing_seconds",
+            "FFT processing time in seconds",
+        ))?;
+        let analysis_features_extracted_total = IntCounter::with_opts(Opts::new(
+            "analysis_features_extracted_total",
+            "Total number of spectral feature extractions",
+        ))?;
+
         // Register all metrics
         registry.register(Box::new(packets_sent_total.clone()))?;
         registry.register(Box::new(packets_received_total.clone()))?;
@@ -141,6 +155,8 @@ impl MetricsContext {
         registry.register(Box::new(jitter_buffer_delay_seconds.clone()))?;
         registry.register(Box::new(network_transit_seconds.clone()))?;
         registry.register(Box::new(receiver_pipeline_seconds.clone()))?;
+        registry.register(Box::new(analysis_fft_processing_seconds.clone()))?;
+        registry.register(Box::new(analysis_features_extracted_total.clone()))?;
 
         Ok(Self {
             registry,
@@ -157,6 +173,8 @@ impl MetricsContext {
             jitter_buffer_delay_seconds,
             network_transit_seconds,
             receiver_pipeline_seconds,
+            analysis_fft_processing_seconds,
+            analysis_features_extracted_total,
         })
     }
 

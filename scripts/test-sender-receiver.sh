@@ -17,6 +17,13 @@
 
 set -euo pipefail
 
+: ${BUILD:=release}
+if [[ "${BUILD}" == release ]] ; then
+    cargo build --release
+else
+    cargo build
+fi
+
 # Defaults
 DURATION="${1:-15}"
 SENDER_METRICS_ADDR="127.0.0.1:9100"
@@ -31,6 +38,7 @@ echo "RTP port          : ${RTP_PORT}"
 echo "Sender metrics    : ${SENDER_METRICS_ADDR}"
 echo "Receiver metrics  : ${RECEIVER_METRICS_ADDR}"
 echo "Duration (sec)    : ${DURATION}"
+echo "BUILD             : ${BUILD}"
 echo
 
 if [[ ! -f "${AUDIO_FILE}" ]]; then
@@ -44,11 +52,11 @@ scrape_metrics() {
 
     echo
     echo "Sender metrics:"
-    curl -sf "http://${SENDER_METRICS_ADDR}/metrics" | head -n 15 || true
+    curl -sf "http://${SENDER_METRICS_ADDR}/metrics" || true
 
     echo
     echo "Receiver metrics:"
-    curl -sf "http://${RECEIVER_METRICS_ADDR}/metrics" | head -n 15 || true
+    curl -sf "http://${RECEIVER_METRICS_ADDR}/metrics" || true
 }
 
 cleanup() {
@@ -63,7 +71,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "Starting receiver..."
-./target/debug/receiver \
+./target/${BUILD}/receiver --analyze \
     --port "${RTP_PORT}" \
     --metrics-bind "${RECEIVER_METRICS_ADDR}" &
 RECEIVER_PID=$!
@@ -71,7 +79,7 @@ RECEIVER_PID=$!
 sleep 1
 
 echo "Starting sender..."
-./target/debug/sender \
+./target/${BUILD}/sender \
     --input "${AUDIO_FILE}" \
     --remote "127.0.0.1:${RTP_PORT}" \
     --metrics-bind "${SENDER_METRICS_ADDR}" &

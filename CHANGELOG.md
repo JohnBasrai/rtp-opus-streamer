@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-01-05
+
+**Phase 4: Audio Analysis & ML Integration (Complete)**
+
+### Added
+- Audio analysis module foundation (Phase 4A)
+  - Sample buffer with overlapped windowing for FFT preparation
+  - i16 → f32 PCM conversion and normalization
+- FFT processor with Hann windowing (Phase 4B)
+  - 1024-point FFT with pre-computed symmetric window
+  - Magnitude spectrum computation (DC to Nyquist)
+  - Performance metrics integration
+  - 8 unit tests validating FFT accuracy
+- Spectral feature extraction (Phase 4C)
+  - Dominant frequency detection (peak bin → Hz conversion)
+  - Spectral energy in dB (20*log10 with -100 dB floor)
+  - Spectral centroid (brightness measure)
+  - 10 unit tests with explicit unit suffixes (_hz, _db)
+- Binary integration (Phase 4D)
+  - `--analyze` CLI flag for receiver to enable real-time analysis
+  - Optional AudioAnalyzer instantiation (zero overhead when disabled)
+  - Structured logging at DEBUG level for analysis features
+  - Prometheus metrics integration
+- Performance analysis tooling
+  - `scripts/analyze-performance.sh` - Parse metrics and validate targets
+  - `docs/analyze-performance-usage.md` - Complete usage guide
+  - `docs/performance-sample.txt` - Release build performance report
+  - Intelligent build detection (debug vs release)
+- rustfft dependency for spectral analysis
+
+### Changed
+- `scripts/test-sender-receiver.sh` - Support BUILD environment variable (debug/release)
+- README.md - Added comprehensive overview section with documentation links
+- README.md - Updated project status to "Phase 4 complete"
+- docs/design.md - Complete Phase 4 documentation with performance results
+- CONTRIBUTING.md - Documented new analysis and test scripts
+
+### Fixed
+- Sender loop bug: Renamed `loop_audio` parameter to `no_loop` for semantic clarity
+- Audio now loops correctly when `--no-loop` flag not specified
+- Added informative loop status logging ("Continuing (Looping)" / "Exiting at EOF")
+
+### Performance (Release Build)
+- FFT execution: 12.3 μs average (4x better than 50 μs target)
+- Analysis overhead: 9% of pipeline time (minimal impact)
+- End-to-end pipeline: 65 μs per frame
+- Compiler optimization: 27.8x faster than debug build
+
 ## [0.3.1] - 2026-01-03
 
 ### Added

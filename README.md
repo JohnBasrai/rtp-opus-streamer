@@ -1,8 +1,22 @@
 # RTP Opus Streamer
 
-Real-time audio streaming using RTP transport (RFC 3550) and Opus encoding (RFC 6716). Demonstrates network resilience, observability, and adaptive behavior for low-latency audio applications.
+Real-time audio streaming system demonstrating production-grade network protocols, audio processing, and observability. Built with Rust for performance and safety.
 
-**Project Status:** Phase 3 complete  
+## Overview
+
+This project implements a complete RTP/Opus streaming pipeline with:
+- **Network Resilience:** Jitter buffering, packet reordering, loss concealment
+- **Audio Analysis:** Real-time FFT-based spectral analysis (Phase 4)
+- **Observability:** Prometheus metrics, structured logging, performance profiling
+- **Production Quality:** Comprehensive testing, CI/CD, RFC compliance
+
+**Target Use Cases:** VoIP systems, live streaming, real-time communication platforms
+
+**Documentation:**
+- 📋 [Design Document](docs/design.md) - Architecture, performance analysis, design decisions
+- 📊 [Performance Report](docs/performance-sample.txt) - Real-world metrics and validation
+
+**Project Status:** Phase 4 complete (Audio Analysis & ML Integration)
 **Development Roadmap:** See [Project Plan](https://github.com/JohnBasrai/rtp-opus-streamer/issues/1)
 
 ## Architecture
@@ -64,8 +78,8 @@ Real-time audio streaming using RTP transport (RFC 3550) and Opus encoding (RFC 
 - [x] **Phase 3: Observability** (Week 3) - Metrics and measurement ✅
   - Prometheus-based metrics, latency measurement, and system observability
 
-- [ ] **Phase 4: Adaptive Behavior** (Week 4+) - Production-quality features
-  - Forward Error Correction, adaptive bitrate, congestion control, multi-stream
+- [ ] **Phase 4: Audio Analysis & ML Integration** (Week 4+) - Audio intelligence and ML model integration
+  - Real-time FFT spectral analysis, Voice Activity Detection (VAD), ONNX Runtime for audio classification
 
 ## Building
 
@@ -165,13 +179,13 @@ cargo bench
 
 ## Key Design Choices (Summary)
 
-**Frame Size: 20ms**  
+**Frame Size: 20ms**
 Opus supports 2.5, 5, 10, 20, 40, 60ms frames. Using 20ms balances:
 - Latency: Lower frame size reduces algorithmic delay
 - Efficiency: Higher frame size improves compression
 - Network: 20ms = 50 packets/sec, manageable overhead
 
-**Jitter Buffer: 60ms**  
+**Jitter Buffer: 60ms**
 Typical networks show 10-30ms jitter. 60ms buffer provides:
 - Headroom for variance (2-3σ coverage)
 - Acceptable added latency

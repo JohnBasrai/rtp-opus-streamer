@@ -38,7 +38,7 @@ pub async fn stream_audio(
     metrics: &rtp_opus_common::MetricsContext,
     ssrc: u32,
     interval_ms: u64,
-    loop_audio: bool,
+    no_loop: bool,
 ) -> Result<()> {
     // ---
     let mut sequence: u16 = 0;
@@ -87,9 +87,11 @@ pub async fn stream_audio(
             tokio::time::sleep(tokio::time::Duration::from_millis(interval_ms)).await;
         }
 
-        if !loop_audio {
+        if no_loop {
+            tracing::info!("Exiting at end of file after {frame_count} frames");
             break;
         }
+        tracing::info!("Continuing (Looping) after {frame_count} frames");
     }
 
     tracing::info!("Streamed {} frames", frame_count);
