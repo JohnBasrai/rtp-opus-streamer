@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Audio analysis module foundation (Phase 4 - Milestone 1A)
+- Sample buffer with overlapped windowing for FFT preparation
+- rustfft dependency for spectral analysis
+
 ## [0.3.1] - 2026-01-03
 
 ### Added

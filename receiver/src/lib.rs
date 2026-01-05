@@ -3,12 +3,14 @@
 //! Provides audio reception and decoding functionality from RTP streams.
 //! This library can be used to build custom receivers or for integration testing.
 
+pub mod analysis;
 pub mod audio;
 pub mod codec;
 pub mod jitter_buffer;
 pub mod network;
 pub mod stats;
 
+pub use analysis::{AnalyzerConfig, AudioAnalyzer, SpectralFeatures};
 pub use audio::AudioPlayer;
 pub use codec::OpusDecoderWrapper;
 pub use jitter_buffer::{JitterBuffer, JitterBufferConfig};

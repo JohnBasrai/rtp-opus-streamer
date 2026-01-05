@@ -64,8 +64,8 @@ Real-time audio streaming using RTP transport (RFC 3550) and Opus encoding (RFC 
 - [x] **Phase 3: Observability** (Week 3) - Metrics and measurement ✅
   - Prometheus-based metrics, latency measurement, and system observability
 
-- [ ] **Phase 4: Adaptive Behavior** (Week 4+) - Production-quality features
-  - Forward Error Correction, adaptive bitrate, congestion control, multi-stream
+- [ ] **Phase 4: Audio Analysis & ML Integration** (Week 4+) - Audio intelligence and ML model integration
+  - Real-time FFT spectral analysis, Voice Activity Detection (VAD), ONNX Runtime for audio classification
 
 ## Building
 
