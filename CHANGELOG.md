@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Updated README examples to use `samples/voice.wav` path
+- Added voice optimization notes throughout documentation
+- Documented Phase 4 completion status
+
+### Added
+- Voice sample (`samples/voice.wav`) matching voice-optimized codec configuration
+- Music sample (`samples/music.wav`) demonstrating known quality limitations
+- `samples/README.md` documenting sample files and current system behavior
+
 ## [0.3.2] - 2026-01-05
 
 **Phase 4: Audio Analysis & ML Integration (Complete)**

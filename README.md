@@ -10,6 +10,8 @@ This project implements a complete RTP/Opus streaming pipeline with:
 - **Observability:** Prometheus metrics, structured logging, performance profiling
 - **Production Quality:** Comprehensive testing, CI/CD, RFC compliance
 
+**Current Configuration:** Voice-optimized (16kHz, 24 kbps). Music content will sound degraded. See `samples/README.md` for details.
+
 **Target Use Cases:** VoIP systems, live streaming, real-time communication platforms
 
 **Documentation:**
@@ -30,7 +32,7 @@ This project implements a complete RTP/Opus streaming pipeline with:
                ↓
 ┌──────────────┴──────────────────────────┐
 │         Opus Encoder                    │
-│          (24 kbps)                      │
+│    (24 kbps, voice-optimized)           │
 └──────────────┬──────────────────────────┘
                │ Compressed frames
                ↓
@@ -78,8 +80,8 @@ This project implements a complete RTP/Opus streaming pipeline with:
 - [x] **Phase 3: Observability** (Week 3) - Metrics and measurement ✅
   - Prometheus-based metrics, latency measurement, and system observability
 
-- [ ] **Phase 4: Audio Analysis & ML Integration** (Week 4+) - Audio intelligence and ML model integration
-  - Real-time FFT spectral analysis, Voice Activity Detection (VAD), ONNX Runtime for audio classification
+- [x] **Phase 4: Audio Analysis & ML Integration** (Week 4+) - Audio intelligence ✅
+  - Real-time FFT spectral analysis, dominant frequency extraction, spectral energy/centroid (use `--analyze` flag)
 
 ## Building
 
@@ -119,11 +121,14 @@ cargo build --release
 
 # With custom jitter buffer depth (default: 60ms)
 ./target/release/receiver --port 5004 --buffer-depth-ms 100
+
+# With real-time audio analysis (Phase 4)
+./target/release/receiver --port 5004 --analyze
 ```
 
 **Terminal 2 - Send Audio:**
 ```bash
-./target/release/sender --input audio.wav --remote 127.0.0.1:5004
+./target/release/sender --input samples/voice.wav --remote 127.0.0.1:5004
 ```
 
 ### Testing with Generated Audio
@@ -144,15 +149,18 @@ ffmpeg -f lavfi -i "sine=frequency=440:duration=5:sample_rate=16000" -ac 1 test.
 ```bash
 sender --input <file.wav> --remote <ip:port> [--interval-ms <ms>]
 ```
-- `--input`: Path to WAV file (any sample rate, mono or stereo)
+- `--input`: Path to WAV file (any sample rate, mono or stereo).
+            Currently optimized for voice (see samples/README.md for details).
 - `--remote`: Destination IP:port (default: 127.0.0.1:5004)
 - `--interval-ms`: Packet send interval in ms (default: 20ms for real-time)
 
 **Receiver:**
 ```bash
-receiver --port <port>
+receiver --port <port> [--buffer-depth-ms <ms>] [--analyze]
 ```
 - `--port`: UDP port to listen on (default: 5004)
+- `--buffer-depth-ms`: Jitter buffer depth in milliseconds (default: 60ms)
+- `--analyze`: Enable real-time spectral analysis output (Phase 4)
 
 ### Example: Local Loopback Test
 
@@ -161,7 +169,10 @@ receiver --port <port>
 cargo run --bin receiver --release
 
 # Terminal 2
-cargo run --bin sender --release -- --input voice.wav
+cargo run --bin sender --release -- --input samples/voice.wav
+
+# With audio analysis
+cargo run --bin receiver --release -- --analyze
 ```
 
 ## Testing
@@ -190,6 +201,10 @@ Typical networks show 10-30ms jitter. 60ms buffer provides:
 - Headroom for variance (2-3σ coverage)
 - Acceptable added latency
 - Reordering window for out-of-sequence packets
+
+**Codec Configuration: Voice-Optimized**
+Current settings (16kHz, 24 kbps, VOIP mode) prioritize bandwidth efficiency for speech.
+Music content will sound degraded. Future work will add configurable codec modes.
 
 See `docs/design.md` for full analysis.
 
